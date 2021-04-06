@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Task, TaskStatus } from './task.model';
 import { v4 as uuid } from 'uuid';
 import { CreateTaskDto } from './dto/create-task.dto';
+import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
 
 /** Use this services to be a model and functions and you can use as an argument any name and them import whatever you have exported */
 /** This looks like graphql in the resolver.js part */
+/** Here is where you define what the function you want to use  */
 @Injectable()
 export class TasksService {
   private tasks: Task[] = [];
@@ -13,8 +15,27 @@ export class TasksService {
     return this.tasks;
   }
 
+  getTaskWithFilters(filterDto: GetTasksFilterDto): Task[] {
+    const { status, search } = filterDto;
+    let tasks = this.getAllTasks();
+    if (status) {
+      tasks = tasks.filter((task) => task.status === status);
+    }
+    if (search) {
+      tasks = tasks.filter(
+        (task) =>
+          task.title.includes(search) || task.description.includes(search),
+      );
+    }
+    return tasks;
+  }
+
   getTaskById(id: string): Task {
-    return this.tasks.find((task) => task.id === id);
+    const found = this.tasks.find((task) => task.id === id);
+    if (!found) {
+      throw new NotFoundException(`No task found with the id of ${id}`);
+    }
+    return found;
   }
 
   createTask(createTaskDto: CreateTaskDto): Task {
@@ -37,6 +58,7 @@ export class TasksService {
   }
 
   deleteTaskById(id: string): void {
-    this.tasks = this.tasks.filter((task) => task.id !== id);
+    const found = this.getTaskById(id);
+    this.tasks = this.tasks.filter((task) => task.id !== found.id);
   }
 }
