@@ -3,6 +3,5 @@ db:
   username: 'postgres'
   password: 'Carlczerny10'
   synchronize: true
-
 jwt:
   secret: 'topSecret51'

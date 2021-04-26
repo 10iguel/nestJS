@@ -53,6 +53,5 @@ describe('FriendsLists', () => {
     it('should throw an error if a friend does not exists', function() {
       expect(() => friendList.removeFriend('Miguel')).toThrow(new Error('There is not such a friend'));
     });
-
   });
 });
